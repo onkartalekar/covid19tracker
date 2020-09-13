@@ -15,12 +15,9 @@
     <script>
         // sorted table
         $(document).ready(function () {
-            $('#stateSummaryTable').DataTable({
-                "paging": false
-            });
-            $('#districtSummaryTable').DataTable({
-                "paging": false
-            });
+            $('#stateSummaryTable').DataTable({});
+            $('#districtSummaryTable').DataTable({});
+            $('#testingFacilityTable').DataTable({});
             $('.dataTables_length').addClass('bs-select');
         });
     </script>
@@ -39,6 +36,7 @@
 
     <link rel="stylesheet" href="../css/fa.css">
     <link rel="stylesheet" href="../css/font.css">
+    <!--<link rel="stylesheet" href="../css/jquery.dataTables.min.css">-->
 
 </head>
 <body ng-app="app" ng-controller="CovidSummaryController">
@@ -123,7 +121,7 @@
 
 <div class="state-district-summary" style="padding: 40px">
 
-    <ul class="nav nav-pills nav-fill">
+    <ul class="nav nav-tabs nav-fill">
         <li class="nav-item" ng-click="setActiveTab(0)">
             <a class="nav-link" ng-class="{active: tabs[0].isActive}" data-toggle="tab" href="#states">
                 {{tabs[0].title}}
@@ -134,11 +132,16 @@
                 {{tabs[1].title}}
             </a>
         </li>
+        <li class="nav-item" ng-click="setActiveTab(2)">
+            <a class="nav-link" ng-class="{active: tabs[2].isActive}" data-toggle="tab" href="#testingFacility">
+                {{tabs[2].title}}
+            </a>
+        </li>
     </ul>
 
     <div class="tab-content" style="margin-top: 20px">
         <div id="states" class="tab-pane" ng-class="{active: tabs[0].isActive}">
-            <table class="table table-hover" id="stateSummaryTable" datatable="ng" ng-if="summary">
+            <table class="table table-hover" id="stateSummaryTable" datatable="ng" ng-if="summary" data-order='[[ 1, "desc" ]]'>
                 <thead>
                 <tr>
                     <th class="header-text">State</th>
@@ -154,7 +157,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="state in states" ng-if="state != 'TT'" ng-click="showHideGraphForState(state)">
+                <tr ng-repeat="state in states" ng-if="state != 'TT'">
                     <td class="cell-large-text">{{statesLookup[state]}}</td>
                     <td class="cell-large-text">{{formatNumberToString(summary[state].total.confirmed, false)}}</td>
                     <td class="cell-normal-text"
@@ -209,7 +212,7 @@
             </tr>-->
 
             <div ng-repeat-end ng-if="state != 'TT'" ng-show="shouldShowGraphForState[state]">
-                <table class="table table-hover" id="districtSummaryTable" datatable="ng">
+                <table class="table table-hover" id="districtSummaryTable" datatable="ng" data-order='[[ 1, "desc" ]]'>
                     <thead>
                     <tr>
                         <th class="header-text">District</th>
@@ -260,6 +263,41 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        <div id="testingFacility" class="tab-pane" ng-class="{active:tabs[2].isActive}">
+            <table class="table table-hover" id="testingFacilityTable" datatable="ng" ng-if="summary" data-order='[[ 6, "desc" ]]'>
+                <thead>
+                <tr>
+                    <th class="header-text">State</th>
+                    <th class="header-text">Total ICU Beds</th>
+                    <th class="header-text">Occupied ICU Beds</th>
+                    <th class="header-text">Total Isolation Beds</th>
+                    <th class="header-text">Total Ventilators</th>
+                    <th class="header-text">Occupied Ventilators</th>
+                    <th class="header-text">Quarantined Patients</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="testingData in testingFacilityData">
+                    <td class="cell-large-text">{{testingData.state}}</td>
+                    <td class="cell-large-text">{{formatNumberToString(testingData.numicubeds, false)}}
+                    </td>
+                    <td class="cell-normal-text">
+                        {{formatNumberToString(testingData.peopleinicu, false)}}
+                    </td>
+                    <td class="cell-large-text">
+                        {{formatNumberToString(testingData.numisolationbeds, false)}}
+                    </td>
+                    <td class="cell-large-text">{{formatNumberToString(testingData.numventilators, false)}}
+                    <td class="cell-normal-text">
+                        {{formatNumberToString(testingData.peopleonventilators, false)}}
+                    </td>
+                    <td class="cell-large-text">
+                        {{formatNumberToString(testingData.totalpeoplecurrentlyinquarantine, false)}}
+                    </td>
+                </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

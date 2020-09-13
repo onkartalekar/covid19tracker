@@ -21,6 +21,10 @@ angular.module("app", ["chart.js", 'datatables'])
             href: "districts",
             title: "Districts Level Data",
             isActive: false
+        }, {
+            href: "testingFacility",
+            title: "Testing Facility Data",
+            isActive: false
         }];
 
         $scope.setActiveTab = function (index) {
@@ -64,7 +68,7 @@ angular.module("app", ["chart.js", 'datatables'])
             "AN": "Andaman and Nicobar Islands",
             "DN": "Dadra Nagar Haveli and Daman Diu",
             "DL": "Delhi",
-            "PY": "Pondicherry",
+            "PY": "Puducherry",
             "LA": "Ladakh",
             "CH": "Chandigarh"
         };
@@ -80,8 +84,8 @@ angular.module("app", ["chart.js", 'datatables'])
             return Math.round(cases / confirmed * 10000) / 100 + '%';
         }
 
-        let apiContext = "https://www.vishwaroop.info";
-        //let apiContext = "http://localhost:8080";
+        //let apiContext = "https://www.vishwaroop.info";
+        let apiContext = "http://localhost:8080";
         $http.get(apiContext + "/covid/india/timeseries")
             .then(function (data) {
                 $scope.seriesData = {};
@@ -90,8 +94,7 @@ angular.module("app", ["chart.js", 'datatables'])
                 $scope.testedGraphSeries = ['tested'];
                 $scope.deceasedGraphSeries = ['deceased'];
                 $scope.statesFromTimeseries = Object.keys(data.data);
-                let totalConfirmed = [], totalRecovered = [], totalDeceased = [], totalTested = [], deltaConfirmed = [],
-                    deltaRecovered = [], deltaDeceased = [], deltaTested = [];
+                let totalConfirmed = [], totalRecovered = [], totalDeceased = [], totalTested = [];
 
                 for (const key in $scope.statesFromTimeseries) {
                     const state = $scope.statesFromTimeseries[key];
@@ -107,12 +110,6 @@ angular.module("app", ["chart.js", 'datatables'])
                                 totalDeceased.push(day.total.deceased);
                                 totalTested.push(day.total.tested);
                             }
-                            if (day.delta) {
-                                deltaConfirmed.push(day.delta.confirmed);
-                                deltaRecovered.push(day.delta.recovered);
-                                deltaDeceased.push(day.delta.deceased);
-                                deltaTested.push(day.delta.tested);
-                            }
                         }
                     }
 
@@ -124,22 +121,6 @@ angular.module("app", ["chart.js", 'datatables'])
                         $scope.nationalSeriesData.push(totalRecovered);
                         $scope.nationalDeceasedSeriesData.push(totalDeceased);
                         $scope.nationalTestedSeriesData.push(totalTested);
-
-                        $scope.nationalStats = {};
-                        $scope.nationalStats.total = {
-                            'confirmed': totalConfirmed[totalConfirmed.length - 1],
-                            'deceased': totalDeceased[totalDeceased.length - 1],
-                            'recovered': totalRecovered[totalRecovered.length - 1],
-                            'tested': totalTested[totalTested.length - 1],
-                            'recoveryRate': $scope.calculateRate(totalRecovered[totalRecovered.length - 1], totalConfirmed[totalConfirmed.length - 1]),
-                            'mortalityRate': $scope.calculateRate(totalDeceased[totalDeceased.length - 1], totalConfirmed[totalConfirmed.length - 1])
-                        };
-                        $scope.nationalStats.delta = {
-                            'confirmed': deltaConfirmed[totalConfirmed.length - 1],
-                            'deceased': deltaDeceased[totalDeceased.length - 1],
-                            'recovered': deltaRecovered[totalRecovered.length - 1],
-                            'tested': deltaTested[deltaTested.length - 1]
-                        };
 
                     } else {
                         $scope.seriesData[state] = [];
@@ -153,10 +134,6 @@ angular.module("app", ["chart.js", 'datatables'])
                     totalRecovered = [];
                     totalDeceased = [];
                     totalTested = [];
-                    deltaConfirmed = [];
-                    deltaRecovered = [];
-                    deltaDeceased = [];
-                    deltaTested = [];
                 }
 
             }, function (error) {
@@ -185,6 +162,13 @@ angular.module("app", ["chart.js", 'datatables'])
                 } else {
                     fillSummaryData(data.data);
                 }
+            }, function (error) {
+                console.log(error);
+            });
+
+        $http.get(apiContext + "/covid/india/testingFacility")
+            .then(function (data) {
+                $scope.testingFacilityData = data.data.states_tested_data;
             }, function (error) {
                 console.log(error);
             });
@@ -234,7 +218,7 @@ angular.module("app", ["chart.js", 'datatables'])
         }
 
         $scope.formatNumberToString = function (number, isSignedNumber) {
-            if (number === undefined || number == null || number === 0) {
+            if (number === undefined || number == null || number === 0 || number === '') {
                 return '-';
             }
 

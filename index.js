@@ -1,7 +1,7 @@
 const express = require('express'),
     app = new express(),
     request = require('request'),
-    covidIndiaDataSource = 'https://api.covid19india.org/v4';
+    covidIndiaDataSource = 'https://api.covid19india.org';
 
 app.use(express.static('client'));
 app.use('/', express.static('client/html'))
@@ -34,7 +34,7 @@ app.use(function (req, res, next) {
 
 app.get('/covid/india/timeseries', function (req, res) {
 
-    request.get(covidIndiaDataSource + '/timeseries.json', {json: true}, (error, response, body) => {
+    request.get(covidIndiaDataSource + '/v4/timeseries.json', {json: true}, (error, response, body) => {
         if (error) {
             return console.log('error:' + error);
         }
@@ -45,7 +45,7 @@ app.get('/covid/india/timeseries', function (req, res) {
 
 app.get('/covid/india/summary/:summaryDate', function (req, res) {
     let summaryDate = req.params.summaryDate;
-    let uri = covidIndiaDataSource + '/data-' + summaryDate + '.json';
+    let uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
     request.get(uri, {json: true}, (error, response, body) => {
         let responseJSON = JSON.parse(JSON.stringify(response));
         if (responseJSON.statusCode === 404) {
@@ -53,5 +53,19 @@ app.get('/covid/india/summary/:summaryDate', function (req, res) {
         } else {
             res.send(body);
         }
+    });
+});
+
+app.get('/covid/india/testingFacility', function (req, res) {
+    request.get(covidIndiaDataSource + '/state_test_data.json', {json: true}, (error, response, body) => {
+        if (error) {
+            return console.log('error:' + error);
+        }
+
+        let today = new Date();
+        let todayString = today.getDate() + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear()
+
+        body.states_tested_data  = body.states_tested_data.filter(state => state.updatedon === todayString);
+        res.send(body);
     });
 });
