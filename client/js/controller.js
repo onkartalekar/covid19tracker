@@ -80,7 +80,7 @@ angular.module("app", ["chart.js", 'datatables'])
             return Math.round(cases / confirmed * 10000) / 100 + '%';
         }
 
-        let apiContext = "http://www.vishwaroop.info";
+        let apiContext = "https://www.vishwaroop.info";
         //let apiContext = "http://localhost:8080";
         $http.get(apiContext + "/covid/india/timeseries")
             .then(function (data) {
