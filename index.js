@@ -48,7 +48,7 @@ app.get('/covid/india/summary/:summaryDate', function (req, res) {
     let uri = covidIndiaDataSource + '/data-' + summaryDate + '.json';
     request.get(uri, {json: true}, (error, response, body) => {
         let responseJSON = JSON.parse(JSON.stringify(response));
-        if (responseJSON.statusCode == 404) {
+        if (responseJSON.statusCode === 404) {
             res.send("No data found");
         } else {
             res.send(body);
