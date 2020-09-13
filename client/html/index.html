@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>COVID-19 Summary - India</title>
+
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/angular.min.js"></script>
+    <script src="../js/jquery.dataTables.min.js"></script>
+    <script src="../js/angular-datatables.js"></script>
+
+    <script src="../js/Chart.min.js"></script>
+    <script src="../js/angular-chart.min.js"></script>
+
+    <script>
+        // sorted table
+        $(document).ready(function () {
+            $('#stateSummaryTable').DataTable({
+                "paging": false
+            });
+            $('#districtSummaryTable').DataTable({
+                "paging": false
+            });
+            $('.dataTables_length').addClass('bs-select');
+        });
+    </script>
+
+    <script src="../js/controller.js"></script>
+    <script src="../js/datatables.min.js"></script>
+    <script src="../js/mdb.min.js"></script>
+    <script src="../js/popper.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+
+
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/datatables.min.css">
+    <link rel="stylesheet" href="../css/mdb.min.css">
+    <link rel="stylesheet" href="../css/bootstrap.min.css">
+
+    <link rel="stylesheet" href="../css/fa.css">
+    <link rel="stylesheet" href="../css/font.css">
+
+</head>
+<body ng-app="app" ng-controller="CovidSummaryController">
+
+<div class="container-fluid" style="padding: 50px 50px 10px 50px">
+    <div class="row">
+        <div class="col" style="text-align: center; margin-bottom: 20px"><h5>COVID-19 Summary - India</h5></div>
+    </div>
+    <div class="row">
+        <div class="col-6 col-lg-3" style="margin-bottom: 30px">
+            <div class="card" style="background-color: #8eaaf1">
+                <div class="card-body">
+                    <div class="card-title summary-card" style="text-align: right">Tested :
+                        {{formatNumberToString(summary['TT'].total.tested, false)}}({{formatNumberToString(summary['TT'].delta.tested, true)}})
+                    </div>
+                    <div class="card-text" style="font-size: medium; text-align: right;color: black">
+                        {{calculateRate(summary['TT'].total.tested, summary['TT'].population)}} of total population
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3" style="margin-bottom: 30px">
+            <div class="card" style="background-color: #e84b4b">
+                <div class="card-body">
+                    <div class="card-title summary-card" style="text-align: right">Confirmed :
+                        {{formatNumberToString(summary['TT'].total.confirmed, false)}}({{formatNumberToString(summary['TT'].delta.confirmed, true)}})
+                    </div>
+                    <div class="card-text" style="font-size: medium; text-align: right;color: black">
+                        {{calculateRate(summary['TT'].total.confirmed, summary['TT'].total.tested)}} of tested cases
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3" style="margin-bottom: 30px">
+            <div class="card" style="background-color: darkseagreen">
+                <div class="card-body">
+                    <div class="card-title summary-card" style="text-align: right">Recovered :
+                        {{formatNumberToString(summary['TT'].total.recovered, false)}}({{formatNumberToString(summary['TT'].delta.recovered, true)}})
+                    </div>
+                    <div class="card-text" style="font-size: medium; text-align: right;color: black">
+                        {{nationalStats.total.recoveryRate}} of confirmed cases
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3" style="margin-bottom: 30px">
+            <div class="card" style="background-color: lightgrey">
+                <div class="card-body">
+                    <div class="card-title summary-card" style="text-align: right">Deceased :
+                        {{formatNumberToString(summary['TT'].total.deceased, false)}}({{formatNumberToString(summary['TT'].delta.deceased, true)}})
+                    </div>
+                    <div class="card-text" style="font-size: medium; text-align: right;color: black">
+                        {{nationalStats.total.mortalityRate}} of confirmed cases
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 30px">
+        <div class="col-4">
+            <div style="text-align: center; margin-bottom: 20px">Tested</div>
+            <canvas class="chart chart-line" chart-data="nationalTestedSeriesData"
+                    chart-labels="labels['TT']"
+                    chart-series="testedGraphSeries" chart-click="onClick"></canvas>
+        </div>
+        <div class="col-4">
+            <div style="text-align: center; margin-bottom: 20px">Confirmed & Recovered</div>
+            <canvas class="chart chart-line" chart-data="nationalSeriesData"
+                    chart-labels="labels['TT']"
+                    chart-series="series" chart-click="onClick"></canvas>
+        </div>
+        <div class="col-4">
+            <div style="text-align: center; margin-bottom: 20px">Deceased</div>
+            <canvas class="chart chart-line" chart-data="nationalDeceasedSeriesData"
+                    chart-labels="labels['TT']"
+                    chart-series="deceasedGraphSeries" chart-click="onClick"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<div class="state-district-summary" style="padding: 40px">
+
+    <ul class="nav nav-pills nav-fill">
+        <li class="nav-item" ng-click="setActiveTab(0)">
+            <a class="nav-link" ng-class="{active: tabs[0].isActive}" data-toggle="tab" href="#states">
+                {{tabs[0].title}}
+            </a>
+        </li>
+        <li class="nav-item" ng-click="setActiveTab(1)">
+            <a class="nav-link" ng-class="{active: tabs[1].isActive}" data-toggle="tab" href="#districts">
+                {{tabs[1].title}}
+            </a>
+        </li>
+    </ul>
+
+    <div class="tab-content" style="margin-top: 20px">
+        <div id="states" class="tab-pane" ng-class="{active: tabs[0].isActive}">
+            <table class="table table-hover" id="stateSummaryTable" datatable="ng" ng-if="summary">
+                <thead>
+                <tr>
+                    <th class="header-text">State</th>
+                    <th class="header-text">Confirmed</th>
+                    <th class="header-text">+/-</th>
+                    <th class="header-text">Recovered</th>
+                    <th class="header-text">+/-</th>
+                    <th class="cell-display header-text">Recovery Rate</th>
+                    <th class="header-text">Deceased</th>
+                    <th class="header-text">+/-</th>
+                    <th class="cell-display header-text">Mortality Rate</th>
+                    <th class="cell-display header-text">Population</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="state in states" ng-if="state != 'TT'" ng-click="showHideGraphForState(state)">
+                    <td class="cell-large-text">{{statesLookup[state]}}</td>
+                    <td class="cell-large-text">{{formatNumberToString(summary[state].total.confirmed, false)}}</td>
+                    <td class="cell-normal-text" ng-class="{'delta-positive' : summary[state].delta.confirmed > 0, 'delta-negative' : summary[state].delta.confirmed < 0}">
+                        {{formatNumberToString(summary[state].delta.confirmed, true)}}
+                    </td>
+                    <td class="cell-large-text">{{formatNumberToString(summary[state].total.recovered, false)}}</td>
+                    <td class="cell-normal-text" ng-class="{'delta-positive' : summary[state].delta.recovered > 0, 'delta-negative' : summary[state].delta.recovered < 0}">
+                        {{formatNumberToString(summary[state].delta.recovered, true)}}
+                    </td>
+                    <td class="cell-display cell-normal-text">{{summary[state].total.recoveryRate}}</td>
+                    <td class="cell-large-text">{{formatNumberToString(summary[state].total.deceased, false)}}
+                    <td class="cell-normal-text" ng-class="{'delta-positive' : summary[state].delta.deceased > 0, 'delta-negative' : summary[state].delta.deceased < 0}">
+                        {{formatNumberToString(summary[state].delta.deceased, true)}}
+                    </td>
+                    <td class="cell-display cell-normal-text">{{summary[state].total.mortalityRate}}</td>
+                    <td class="cell-display cell-normal-text">{{formatNumberToString(summary[state].population, false)}}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div id="districts" class="tab-pane container-fluid" ng-class="{active: tabs[1].isActive}">
+            <div class="row">
+                <div class="col-12 header-note">Click on state summary to see district level data</div>
+            </div>
+            <div class="row district-table-cell" ng-repeat-start="state in states" ng-if="state != 'TT'"
+                 ng-click="showHideGraphForState(state)">
+                <div class="col-11">
+                    <b>{{statesLookup[state]}}</b> - Population tested : <b>{{summary[state].total.testingRate}}</b>.
+                    Positive tests : <b>{{summary[state].total.confirmedRate}}</b>. Recovery rate :
+                    <b>{{summary[state].total.recoveryRate}}</b>. Mortality rate :
+                    <b>{{summary[state].total.mortalityRate}}</b>.
+                </div>
+                <div class="col-1">
+                    <span ng-click="showHideGraphForState(state)"><span ng-show="!shouldShowGraphForState[state]"
+                                                                        class="fa fa-angle-double-right"></span><span
+                            ng-show="shouldShowGraphForState[state]" class="fa fa-angle-double-down"></span>
+                    </span>
+                </div>
+            </div>
+            <!--<tr ng-if="state != 'TT'" ng-show="shouldShowGraphForState[state]">
+                <td></td>
+                <td colspan="3">
+                    <canvas class="chart chart-line" chart-data="seriesData[state]"
+                            chart-labels="labels[state]"
+                            chart-series="series" chart-click="onClick"></canvas>
+                </td>
+            </tr>-->
+
+            <div ng-repeat-end ng-if="state != 'TT'" ng-show="shouldShowGraphForState[state]">
+                <table class="table table-hover" id="districtSummaryTable" datatable="ng">
+                    <thead>
+                    <tr>
+                        <th class="header-text">District</th>
+                        <th class="header-text">Confirmed</th>
+                        <th class="header-text">+/-</th>
+                        <th class="header-text">Recovered</th>
+                        <th class="header-text">+/-</th>
+                        <th class="cell-display header-text">Recovery Rate</th>
+                        <th class="header-text">Deceased</th>
+                        <th class="header-text">+/-</th>
+                        <th class="cell-display header-text">Mortality Rate</th>
+                        <th class="cell-display header-text">Population</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="district in summary[state].districtNames">
+                        <td class="cell-large-text">{{district}}</td>
+                        <td class="cell-large-text">
+                            {{formatNumberToString(summary[state].districts[district].total.confirmed, false)}}
+                        </td>
+                        <td class="cell-large-text" ng-class="{'delta-positive' : summary[state].districts[district].delta.confirmed > 0, 'delta-negative' : summary[state].districts[district].delta.confirmed < 0}">
+                            {{formatNumberToString(summary[state].districts[district].delta.confirmed, true)}}
+                        </td>
+                        <td class="cell-large-text">
+                            {{formatNumberToString(summary[state].districts[district].total.recovered, false)}}
+                        </td>
+                        <td class="cell-large-text" ng-class="{'delta-positive' : summary[state].districts[district].delta.recovered > 0, 'delta-negative' : summary[state].districts[district].delta.recovered < 0}">
+                            {{formatNumberToString(summary[state].districts[district].delta.recovered, true)}}
+                        </td>
+                        <td class="cell-display cell-large-text">{{summary[state].districts[district].total.recoveryRate}}</td>
+                        <td class="cell-large-text">
+                            {{formatNumberToString(summary[state].districts[district].total.deceased, false)}}
+                        <td class="cell-large-text" ng-class="{'delta-positive' : summary[state].districts[district].delta.deceased > 0, 'delta-negative' : summary[state].districts[district].delta.deceased < 0}">
+                            {{formatNumberToString(summary[state].districts[district].delta.deceased, true)}}
+                        </td>
+                        <td class="cell-display cell-large-text">{{summary[state].districts[district].total.mortalityRate}}</td>
+                        <td class="cell-display cell-large-text">{{formatNumberToString(summary[state].districts[district].population, false)}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12 foot-note">Powered by : <a href="https://api.covid19india.org/"> COVID19INDIA </a>(A
+        crowdsourced initiative) Last updated - {{effectiveDate}}.
+    </div>
+</div>
+</body>
+</html>
