@@ -1,6 +1,7 @@
 const express = require('express'),
     app = new express(),
-    request = require('request');
+    request = require('request'),
+    covidIndiaDataSource = 'https://api.covid19india.org/v4';
 
 app.use(express.static('client'));
 app.use('/', express.static('client/html'))
@@ -31,9 +32,9 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.get('/timeseries', function (req, res) {
+app.get('/covid/india/timeseries', function (req, res) {
 
-    request.get('https://api.covid19india.org/v4/timeseries.json', {json: true}, (error, response, body) => {
+    request.get(covidIndiaDataSource + '/timeseries.json', {json: true}, (error, response, body) => {
         if (error) {
             return console.log('error:' + error);
         }
@@ -42,9 +43,9 @@ app.get('/timeseries', function (req, res) {
     });
 });
 
-app.get('/summary/:summaryDate', function (req, res) {
+app.get('/covid/india/summary/:summaryDate', function (req, res) {
     let summaryDate = req.params.summaryDate;
-    let uri = 'https://api.covid19india.org/v4/data-' + summaryDate + '.json';
+    let uri = covidIndiaDataSource + '/data-' + summaryDate + '.json';
     request.get(uri, {json: true}, (error, response, body) => {
         let responseJSON = JSON.parse(JSON.stringify(response));
         if (responseJSON.statusCode == 404) {

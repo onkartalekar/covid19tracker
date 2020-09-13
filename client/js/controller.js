@@ -82,7 +82,7 @@ angular.module("app", ["chart.js", 'datatables'])
 
         let apiContext = "http://www.vishwaroop.info";
         //let apiContext = "http://localhost:8080";
-        $http.get(apiContext + "/timeseries")
+        $http.get(apiContext + "/covid/india/timeseries")
             .then(function (data) {
                 $scope.seriesData = {};
                 $scope.labels = {};
@@ -164,7 +164,7 @@ angular.module("app", ["chart.js", 'datatables'])
             });
 
         let summaryDateParameter = effectiveDate.toISOString().substring(0, 10);
-        $http.get(apiContext + "/summary/" + summaryDateParameter)
+        $http.get(apiContext + "/covid/india/summary/" + summaryDateParameter)
             .then(function (data) {
                 $scope.effectiveDate = effectiveDate.toDateString();
                 if (data.data === 'No data found') {
