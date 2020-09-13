@@ -75,6 +75,12 @@
     text-align: right;
 }
 
+@media all and (max-device-width: 640px){
+    .header-note {
+        font-size: 20px;
+    }
+}
+
 .foot-note {
     padding: 5px;
     margin-bottom: 15px;
