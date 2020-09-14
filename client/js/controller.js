@@ -84,8 +84,8 @@ angular.module("app", ["chart.js", 'datatables'])
             return Math.round(cases / confirmed * 10000) / 100 + '%';
         }
 
-        //let apiContext = "https://www.vishwaroop.info";
-        let apiContext = "http://localhost:8080";
+        let apiContext = "https://www.vishwaroop.info";
+        //let apiContext = "http://localhost:8080";
         $http.get(apiContext + "/covid/india/timeseries")
             .then(function (data) {
                 $scope.seriesData = {};
@@ -122,6 +122,11 @@ angular.module("app", ["chart.js", 'datatables'])
                         $scope.nationalDeceasedSeriesData.push(totalDeceased);
                         $scope.nationalTestedSeriesData.push(totalTested);
 
+                        $scope.nationalStats = {};
+                        $scope.nationalStats.total = {
+                            'recoveryRate': $scope.calculateRate(totalRecovered[totalRecovered.length - 1], totalConfirmed[totalConfirmed.length - 1]),
+                            'mortalityRate': $scope.calculateRate(totalDeceased[totalDeceased.length - 1], totalConfirmed[totalConfirmed.length - 1])
+                        };
                     } else {
                         $scope.seriesData[state] = [];
                         $scope.seriesData[state].push(totalConfirmed)

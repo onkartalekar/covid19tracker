@@ -65,7 +65,7 @@ app.get('/covid/india/testingFacility', function (req, res) {
         let today = new Date();
         let todayString = today.getDate() + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear()
 
-        body.states_tested_data  = body.states_tested_data.filter(state => state.updatedon === todayString);
+        body.states_tested_data = body.states_tested_data.filter(state => state.updatedon === todayString);
         res.send(body);
     });
 });
