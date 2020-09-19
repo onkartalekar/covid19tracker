@@ -43,18 +43,60 @@ app.get('/covid/india/timeseries', function (req, res) {
     });
 });
 
-app.get('/covid/india/summary/:summaryDate', function (req, res) {
-    let summaryDate = req.params.summaryDate;
+app.get('/covid/india/detailedSummary', function (req, res) {
+    let effectiveDate = new Date();
+    effectiveDate.setDate(new Date().getDate() - 1);
+    let summaryDate = effectiveDate.toISOString().substring(0, 10);
     let uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
     request.get(uri, {json: true}, (error, response, body) => {
         let responseJSON = JSON.parse(JSON.stringify(response));
         if (responseJSON.statusCode === 404) {
-            res.send("No data found");
+            effectiveDate.setDate(effectiveDate.getDate() - 1);
+            summaryDate = effectiveDate.toISOString().substring(0, 10);
+            uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
+            request.get(uri, {json: true}, (error, response, body) => {
+                let responseJSON = JSON.parse(JSON.stringify(response));
+                if (responseJSON.statusCode === 404) {
+                    res.send("No data found");
+                } else {
+                    body.effectiveDate = summaryDate;
+                    res.send(body);
+                }
+            });
         } else {
+            body.effectiveDate = summaryDate;
             res.send(body);
         }
     });
 });
+
+app.get('/covid/india/nationalSummary', function (req, res) {
+    let effectiveDate = new Date();
+    effectiveDate.setDate(new Date().getDate() - 1);
+    let summaryDate = effectiveDate.toISOString().substring(0, 10);
+    let uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
+    request.get(uri, {json: true}, (error, response, body) => {
+        let responseJSON = JSON.parse(JSON.stringify(response));
+        if (responseJSON.statusCode === 404) {
+            effectiveDate.setDate(effectiveDate.getDate() - 1);
+            summaryDate = effectiveDate.toISOString().substring(0, 10);
+            uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
+            request.get(uri, {json: true}, (error, response, body) => {
+                let responseJSON = JSON.parse(JSON.stringify(response));
+                if (responseJSON.statusCode === 404) {
+                    res.send("No data found");
+                } else {
+                    body.effectiveDate = summaryDate;
+                    res.send(body);
+                }
+            });
+        } else {
+            body.effectiveDate = summaryDate;
+            res.send(body);
+        }
+    });
+});
+
 
 app.get('/covid/india/testingFacility', function (req, res) {
     request.get(covidIndiaDataSource + '/state_test_data.json', {json: true}, (error, response, body) => {

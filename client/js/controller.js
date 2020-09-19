@@ -146,27 +146,10 @@ angular.module("app", ["chart.js", 'datatables'])
             });
 
         let summaryDateParameter = effectiveDate.toISOString().substring(0, 10);
-        $http.get(apiContext + "/covid/india/summary/" + summaryDateParameter)
+        $http.get(apiContext + "/covid/india/detailedSummary")
             .then(function (data) {
                 $scope.effectiveDate = effectiveDate.toDateString();
-                if (data.data === 'No data found') {
-                    console.log('No data found for ' + summaryDateParameter + '.');
-                    effectiveDate.setDate(effectiveDate.getDate() - 1);
-                    summaryDateParameter = effectiveDate.toISOString().substring(0, 10);
-
-                    $http.get(apiContext + "/summary/" + summaryDateParameter)
-                        .then(function (data) {
-                            if (data.data === 'No data found') {
-                                console.log('No data found for ' + summaryDateParameter + '. Please try again later.');
-                            } else {
-                                fillSummaryData(data.data);
-                            }
-                        }, function (error) {
-                            console.log(error);
-                        });
-                } else {
-                    fillSummaryData(data.data);
-                }
+                fillSummaryData(data.data);
             }, function (error) {
                 console.log(error);
             });
