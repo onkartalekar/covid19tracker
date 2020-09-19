@@ -86,13 +86,15 @@ app.get('/covid/india/nationalSummary', function (req, res) {
                 if (responseJSON.statusCode === 404) {
                     res.send("No data found");
                 } else {
-                    body.effectiveDate = summaryDate;
-                    res.send(body);
+                    let responseBody = body['TT'];
+                    responseBody.effectiveDate = summaryDate;
+                    res.send(responseBody);
                 }
             });
         } else {
-            body.effectiveDate = summaryDate;
-            res.send(body);
+            let responseBody = body['TT'];
+            responseBody.effectiveDate = summaryDate;
+            res.send(responseBody);
         }
     });
 });
