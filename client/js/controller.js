@@ -84,8 +84,8 @@ angular.module("app", ["chart.js", 'datatables'])
             return Math.round(cases / confirmed * 10000) / 100 + '%';
         }
 
-        let apiContext = "https://www.vishwaroop.info";
-        //let apiContext = "http://localhost:8080";
+        //let apiContext = "https://www.vishwaroop.info";
+        let apiContext = "http://localhost:8080";
         $http.get(apiContext + "/covid/india/timeseries")
             .then(function (data) {
                 $scope.seriesData = {};
@@ -148,7 +148,7 @@ angular.module("app", ["chart.js", 'datatables'])
         let summaryDateParameter = effectiveDate.toISOString().substring(0, 10);
         $http.get(apiContext + "/covid/india/detailedSummary")
             .then(function (data) {
-                $scope.effectiveDate = effectiveDate.toDateString();
+                $scope.effectiveDate = new Date(data.data.effectiveDate).toUTCString().substring(0, 16)
                 fillSummaryData(data.data);
             }, function (error) {
                 console.log(error);
