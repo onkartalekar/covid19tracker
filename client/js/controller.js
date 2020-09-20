@@ -84,7 +84,7 @@ angular.module("app", ["chart.js", 'datatables'])
             return Math.round(cases / confirmed * 10000) / 100 + '%';
         }
 
-        //let apiContext = "https://www.vishwaroop.info";
+        //let apiContext = "https://vishwaroop.info";
         let apiContext = "http://localhost:8080";
         $http.get(apiContext + "/covid/india/timeseries")
             .then(function (data) {
@@ -148,7 +148,7 @@ angular.module("app", ["chart.js", 'datatables'])
         let summaryDateParameter = effectiveDate.toISOString().substring(0, 10);
         $http.get(apiContext + "/covid/india/detailedSummary")
             .then(function (data) {
-                $scope.effectiveDate = new Date(data.data.effectiveDate).toUTCString().substring(0, 16)
+                $scope.effectiveDate = new Date(data.data['TT'].effectiveDate).toUTCString().substring(0, 16)
                 fillSummaryData(data.data);
             }, function (error) {
                 console.log(error);
@@ -166,12 +166,15 @@ angular.module("app", ["chart.js", 'datatables'])
             $scope.states = Object.keys(summary);
 
             $scope.states.forEach(state => {
-                $scope.summary[state].population = summary[state].meta.population;
-                $scope.summary[state].total.testingRate = $scope.calculateRate(summary[state].total.tested, summary[state].population);
-                $scope.summary[state].total.confirmedRate = $scope.calculateRate(summary[state].total.confirmed, summary[state].total.tested);
-                $scope.summary[state].total.recoveryRate = $scope.calculateRate(summary[state].total.recovered, summary[state].total.confirmed);
-                $scope.summary[state].total.mortalityRate = $scope.calculateRate(summary[state].total.deceased, summary[state].total.confirmed);
-
+                if (summary[state].meta) {
+                    $scope.summary[state].population = summary[state].meta.population;
+                }
+                if($scope.summary[state].total) {
+                    $scope.summary[state].total.testingRate = $scope.calculateRate(summary[state].total.tested, summary[state].population);
+                    $scope.summary[state].total.confirmedRate = $scope.calculateRate(summary[state].total.confirmed, summary[state].total.tested);
+                    $scope.summary[state].total.recoveryRate = $scope.calculateRate(summary[state].total.recovered, summary[state].total.confirmed);
+                    $scope.summary[state].total.mortalityRate = $scope.calculateRate(summary[state].total.deceased, summary[state].total.confirmed);
+                }
 
                 if (state !== 'TT') {
                     $scope.summary[state].districtNames = Object.keys(summary[state].districts);

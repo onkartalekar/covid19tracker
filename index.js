@@ -59,12 +59,12 @@ app.get('/covid/india/detailedSummary', function (req, res) {
                 if (responseJSON.statusCode === 404) {
                     res.send("No data found");
                 } else {
-                    body.effectiveDate = summaryDate;
+                    body['TT'].effectiveDate = summaryDate;
                     res.send(body);
                 }
             });
         } else {
-            body.effectiveDate = summaryDate;
+            body['TT'].effectiveDate = summaryDate;
             res.send(body);
         }
     });
@@ -107,9 +107,14 @@ app.get('/covid/india/testingFacility', function (req, res) {
         }
 
         let today = new Date();
-        let todayString = today.getDate() + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear()
+        let todayString = today.getDate() + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear();
+        let yesterdayString = (today.getDate() - 1) + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear();
+        let responseBody = {};
+        responseBody.states_tested_data = body.states_tested_data.filter(state => state.updatedon === todayString);
+        if (responseBody.states_tested_data === undefined || responseBody.states_tested_data === null || responseBody.states_tested_data.length === 0) {
+            responseBody.states_tested_data = body.states_tested_data.filter(state => state.updatedon === yesterdayString);
+        }
 
-        body.states_tested_data = body.states_tested_data.filter(state => state.updatedon === todayString);
-        res.send(body);
+        res.send(responseBody);
     });
 });
