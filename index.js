@@ -1,7 +1,10 @@
 const express = require('express'),
     app = new express(),
     request = require('request'),
+    detailedSummaryCache = {},
     covidIndiaDataSource = 'https://api.covid19india.org';
+
+let timeseriesCache = null, testingFacilityDataCache = null;
 
 app.use(express.static('client'));
 app.use('/', express.static('client/html'))
@@ -34,40 +37,64 @@ app.use(function (req, res, next) {
 
 app.get('/covid/india/timeseries', function (req, res) {
 
-    request.get(covidIndiaDataSource + '/v4/timeseries.json', {json: true}, (error, response, body) => {
-        if (error) {
-            return console.log('error:' + error);
-        }
+    if (new Date().getHours() === 22) {
+        timeseriesCache = null;
+    }
 
-        res.send(body);
-    });
+    if (timeseriesCache != null) {
+        res.send(timeseriesCache);
+    } else {
+        request.get(covidIndiaDataSource + '/v4/timeseries.json', {json: true}, (error, response, body) => {
+            timeseriesCache = body;
+            if (error) {
+                return console.log('error:' + error);
+            }
+
+            res.send(body);
+        });
+    }
 });
 
 app.get('/covid/india/detailedSummary', function (req, res) {
     let effectiveDate = new Date();
     effectiveDate.setDate(new Date().getDate() - 1);
     let summaryDate = effectiveDate.toISOString().substring(0, 10);
-    let uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
-    request.get(uri, {json: true}, (error, response, body) => {
-        let responseJSON = JSON.parse(JSON.stringify(response));
-        if (responseJSON.statusCode === 404) {
-            effectiveDate.setDate(effectiveDate.getDate() - 1);
-            summaryDate = effectiveDate.toISOString().substring(0, 10);
-            uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
+
+    if (detailedSummaryCache.hasOwnProperty(summaryDate)) {
+        res.send(detailedSummaryCache[summaryDate]);
+    } else {
+        let effectiveDateForCache = new Date();
+        effectiveDateForCache.setDate(new Date().getDate() - 2);
+        let summaryDateForCache = effectiveDateForCache.toISOString().substring(0, 10);
+        if (detailedSummaryCache.hasOwnProperty(summaryDateForCache)) {
+            res.send(detailedSummaryCache[summaryDateForCache]);
+        } else {
+
+            let uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
             request.get(uri, {json: true}, (error, response, body) => {
                 let responseJSON = JSON.parse(JSON.stringify(response));
                 if (responseJSON.statusCode === 404) {
-                    res.send("No data found");
+                    effectiveDate.setDate(effectiveDate.getDate() - 1);
+                    summaryDate = effectiveDate.toISOString().substring(0, 10);
+                    uri = covidIndiaDataSource + '/v4/data-' + summaryDate + '.json';
+                    request.get(uri, {json: true}, (error, response, body) => {
+                        let responseJSON = JSON.parse(JSON.stringify(response));
+                        if (responseJSON.statusCode === 404) {
+                            res.send("No data found");
+                        } else {
+                            body['TT'].effectiveDate = summaryDate;
+                            detailedSummaryCache[summaryDate] = body;
+                            res.send(body);
+                        }
+                    });
                 } else {
                     body['TT'].effectiveDate = summaryDate;
+                    detailedSummaryCache[summaryDate] = body;
                     res.send(body);
                 }
             });
-        } else {
-            body['TT'].effectiveDate = summaryDate;
-            res.send(body);
         }
-    });
+    }
 });
 
 app.get('/covid/india/nationalSummary', function (req, res) {
@@ -101,20 +128,30 @@ app.get('/covid/india/nationalSummary', function (req, res) {
 
 
 app.get('/covid/india/testingFacility', function (req, res) {
-    request.get(covidIndiaDataSource + '/state_test_data.json', {json: true}, (error, response, body) => {
-        if (error) {
-            return console.log('error:' + error);
-        }
 
-        let today = new Date();
-        let todayString = today.getDate() + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear();
-        let yesterdayString = (today.getDate() - 1) + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear();
-        let responseBody = {};
-        responseBody.states_tested_data = body.states_tested_data.filter(state => state.updatedon === todayString);
-        if (responseBody.states_tested_data === undefined || responseBody.states_tested_data === null || responseBody.states_tested_data.length === 0) {
-            responseBody.states_tested_data = body.states_tested_data.filter(state => state.updatedon === yesterdayString);
-        }
+    if (new Date().getHours() === 22) {
+        testingFacilityDataCache = null;
+    }
 
-        res.send(responseBody);
-    });
+    if (testingFacilityDataCache != null) {
+        res.send(testingFacilityDataCache);
+    } else {
+        request.get(covidIndiaDataSource + '/state_test_data.json', {json: true}, (error, response, body) => {
+            if (error) {
+                return console.log('error:' + error);
+            }
+
+            let today = new Date();
+            let todayString = today.getDate() + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear();
+            let yesterdayString = (today.getDate() - 1) + '/' + (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getFullYear();
+            let responseBody = {};
+            responseBody.states_tested_data = body.states_tested_data.filter(state => state.updatedon === todayString);
+            if (responseBody.states_tested_data === undefined || responseBody.states_tested_data === null || responseBody.states_tested_data.length === 0) {
+                responseBody.states_tested_data = body.states_tested_data.filter(state => state.updatedon === yesterdayString);
+            }
+
+            testingFacilityDataCache = responseBody;
+            res.send(responseBody);
+        });
+    }
 });
