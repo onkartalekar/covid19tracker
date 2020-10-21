@@ -2,7 +2,7 @@
     font-size: 20px;
 }
 
-@media all and (max-device-width: 640px){
+@media all and (max-device-width: 640px) {
     .summary-card {
         font-size: 26px;
     }
@@ -12,7 +12,7 @@
     font-size: 16px;
 }
 
-@media all and (max-device-width: 640px){
+@media all and (max-device-width: 640px) {
     .state-district-summary {
         font-size: 26px;
     }
@@ -22,7 +22,7 @@
     font-size: 14px;
 }
 
-@media all and (max-device-width: 640px){
+@media all and (max-device-width: 640px) {
     .cell-normal-text {
         font-size: 20px;
     }
@@ -32,17 +32,17 @@
     font-size: 16px;
 }
 
-@media all and (max-device-width: 640px){
+@media all and (max-device-width: 640px) {
     .cell-large-text {
         font-size: 26px;
     }
 }
 
-.cell-display{
+.cell-display {
     display: table-cell;
 }
 
-@media all and (max-device-width: 640px){
+@media all and (max-device-width: 640px) {
     .cell-display {
         display: none;
     }
@@ -52,7 +52,7 @@
     font-size: 16px;
 }
 
-@media all and (max-device-width: 640px){
+@media all and (max-device-width: 640px) {
     .header-text {
         font-size: 20px;
     }
@@ -75,7 +75,7 @@
     text-align: right;
 }
 
-@media all and (max-device-width: 640px){
+@media all and (max-device-width: 640px) {
     .header-note {
         font-size: 20px;
     }
@@ -90,12 +90,18 @@
     text-align: center;
 }
 
-.district-table-cell{
+.district-table-cell {
     margin: 15px;
     border: lightgray 1px solid;
     border-radius: 5px;
     padding: 25px;
     background-color: whitesmoke;
+}
+
+.country-flag {
+    margin-left: 5px;
+    margin-right: 5px;
+    width: 25px
 }
 
 /* sorted table */

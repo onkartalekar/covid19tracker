@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>COVID-19 Summary - India</title>
+    <title>COVID-19 Summary</title>
 
     <script src="../js/jquery.min.js"></script>
     <script src="../js/angular.min.js"></script>
@@ -43,7 +43,12 @@
 
 <div class="container-fluid" style="padding: 50px 50px 10px 50px">
     <div class="row">
-        <div class="col" style="text-align: center; margin-bottom: 20px"><h5>COVID-19 Summary - India</h5></div>
+        <div class="col-6" style="margin-bottom: 20px; font-size: medium">
+            <span style="cursor: pointer">India<img src="img/India.png" class="country-flag"></span>|
+            <span style="cursor: pointer">USA<img src="img/usa.png" class="country-flag"></span>|
+            <span style="cursor: pointer">Canada<img src="img/canada.png" class="country-flag"></span>|
+            <span style="cursor: pointer">Chile<img src="img/chile.png" class="country-flag"></span>
+        </div>
     </div>
     <div class="row">
         <div class="col-6 col-lg-3" style="margin-bottom: 30px">
@@ -141,7 +146,8 @@
 
     <div class="tab-content" style="margin-top: 20px">
         <div id="states" class="tab-pane" ng-class="{active: tabs[0].isActive}">
-            <table class="table table-hover" id="stateSummaryTable" datatable="ng" ng-if="summary" data-order='[[ 1, "desc" ]]'>
+            <table class="table table-hover" id="stateSummaryTable" datatable="ng" ng-if="summary"
+                   data-order='[[ 1, "desc" ]]'>
                 <thead>
                 <tr>
                     <th class="header-text">State</th>
@@ -265,7 +271,8 @@
             </div>
         </div>
         <div id="testingFacility" class="tab-pane" ng-class="{active:tabs[2].isActive}">
-            <table class="table table-hover" id="testingFacilityTable" datatable="ng" ng-if="summary" data-order='[[ 6, "desc" ]]'>
+            <table class="table table-hover" id="testingFacilityTable" datatable="ng" ng-if="summary"
+                   data-order='[[ 6, "desc" ]]'>
                 <thead>
                 <tr>
                     <th class="header-text">State</th>

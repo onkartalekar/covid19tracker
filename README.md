@@ -1,4 +1,4 @@
-# COVID19 Tracker For India
+# COVID19 Tracker
 
 The portal URL - http://www.vishwaroop.info
 

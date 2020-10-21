@@ -10,6 +10,7 @@ app.use(express.static('client'));
 app.use('/', express.static('client/html'))
 app.use('/js', express.static('client/js'));
 app.use('/css', express.static('client/css'));
+app.use('/img', express.static('client/img'));
 app.use('/webfonts', express.static('client/webfonts'))
 
 const port = 8080;
