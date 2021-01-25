@@ -49,6 +49,7 @@ angular.module("app", ["chart.js", 'datatables'])
             "JH": "Jharkhand",
             "KA": "Karnataka",
             "KL": "Kerala",
+            "LD": "Lakshadweep",
             "MP": "Madhya Pradesh",
             "MH": "Maharashtra",
             "MN": "Manipur",
